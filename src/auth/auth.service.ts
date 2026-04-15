@@ -2,42 +2,65 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
-
 export class AuthService {
   constructor(
-  private jwtService: JwtService,
-  private httpService: HttpService,
-) {}
+    private jwtService: JwtService,
+    private httpService: HttpService,
+  ) {}
 
   async validateUser(correo: string) {
-  try {
-    const response = await firstValueFrom(
-      this.httpService.get(`http://localhost:3001/users/${correo}`)
-    );
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`http://localhost:3001/users/${correo}`)
+      );
 
-    return response.data;
+      return response.data;
 
-  } 
-  catch (error) {
-    return null;
+    } catch (error) {
+      return null;
+    }
   }
-}
-   
+
+  async register(registerDto: RegisterDto) {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post('http://localhost:3001/users', registerDto)
+      );
+
+      const user = response.data;
+
+      const payload = {
+        sub: user.documento_identidad,
+        correo: user.correo,
+        rol: user.rol,
+      };
+
+      return {
+        user,
+        access_token: this.jwtService.sign(payload),
+      };
+
+    } catch (error) {
+      throw new Error('Error al registrar usuario');
+    }
+  }
+
   async login(user: any) {
-  if (!user) {
-    throw new UnauthorizedException('Usuario no valido');
+    if (!user) {
+      throw new UnauthorizedException('Usuario no valido');
+    }
+
+    const payload = {
+      sub: user.documento_identidad,
+      correo: user.correo,
+      rol: user.rol,
+    };
+
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
-
-  const payload = {
-    sub: user.documento_identidad,
-    correo: user.correo,
-    rol: user.rol,
-  };
-
-  return {
-    access_token: this.jwtService.sign(payload),
-  };
-}
 }
