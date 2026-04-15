@@ -1,24 +1,33 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
+
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+  private jwtService: JwtService,
+  private httpService: HttpService,
+) {}
 
   async validateUser(correo: string) {
-  if (correo === 'test@parknear.com') {
-    return {
-      documento_identidad: '1234567890',
-      correo: 'test@parknear.com',
-      rol: 'CONDUCTOR',
-    };
+  try {
+    const response = await firstValueFrom(
+      this.httpService.get(`http://localhost:3001/users/${correo}`)
+    );
+
+    return response.data;
+
+  } 
+  catch (error) {
+    return null;
   }
-  return null;
 }
    
   async login(user: any) {
   if (!user) {
-    throw new UnauthorizedException('Usuario no válido');
+    throw new UnauthorizedException('Usuario no valido');
   }
 
   const payload = {
