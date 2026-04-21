@@ -1,9 +1,14 @@
+import { EstadoUsuario } from 'src/database/schema';
+
 export class RegisterDto {
   documento_identidad!: string;
   primer_nombre!: string;
+  segundo_nombre?: string;
   primer_apellido!: string;
-  rol!: string;
-  correo!: string;
+  segundo_apellido?: string;
+  email!: string;
+  contrasena!: string;
   celular!: string;
-  estado!: string;
+  estado?: EstadoUsuario;
+  tipo_usuario?: 'conductor' | 'controlador';
 }
