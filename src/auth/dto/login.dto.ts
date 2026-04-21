@@ -1,3 +1,4 @@
 export class LoginDto {
-  correo: string;
+  email!: string;
+  contrasena!: string;
 }
