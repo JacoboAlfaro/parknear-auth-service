@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConflictException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { DrizzleService } from 'src/database/drizzle.service';
-import { EstadoUsuario, conductores, controladores, usuarios } from 'src/database/schema';
+import { EstadoUsuario, admin, conductores, controladores, usuarios } from 'src/database/schema';
 
-export type TipoUsuario = 'conductor' | 'controlador' | null;
+export type TipoUsuario = 'conductor' | 'controlador' | 'admin' | null;
 
 export interface AuthUserRecord {
   id: string;
@@ -74,6 +74,13 @@ export class UsersRepository {
           await tx.insert(controladores).values({
             id: usuario.id,
             estado,
+          });
+        }
+
+        if (input.tipo_usuario === 'admin') {
+          await tx.insert(admin).values({
+            id: usuario.id,
+            estado: 'activo',
           });
         }
 
@@ -159,6 +166,15 @@ export class UsersRepository {
 
     if (controlador) {
       return 'controlador';
+    }
+
+    const [adminUser] = await this.drizzleService.db
+      .select({ id: admin.id })
+      .from(admin)
+      .where(eq(admin.id, userId));
+
+    if (adminUser) {
+      return 'admin';
     }
 
     return null;

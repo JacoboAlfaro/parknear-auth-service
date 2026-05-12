@@ -14,7 +14,7 @@ import { AuthUserRecord, UsersRepository } from './repositories/users.repository
 interface JwtPayload {
   sub: string;
   email: string;
-  tipo_usuario: 'conductor' | 'controlador' | null;
+  tipo_usuario: 'conductor' | 'controlador' | 'admin' | null;
   estado: string;
 }
 
